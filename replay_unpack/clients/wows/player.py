@@ -31,6 +31,9 @@ class ReplayPlayer(ControlledPlayerBase):
         except RuntimeError:
             return get_definitions('_'.join(version[:3]))
 
+    def _get_movements(self):
+        return get_movements()
+
     def _get_controller(self, version):
         try:
             return get_controller('_'.join(version[:4]))
@@ -99,6 +102,14 @@ class ReplayPlayer(ControlledPlayerBase):
             self._battle_controller.create_entity(entity)
 
         elif isinstance(packet, Position):
+            entity = self._battle_controller.entities[packet.entityId]
+            try:
+                if packet.entityId in self._movements: self._movements[packet.entityId].append((entity.position.x, entity.position.z))
+                else: self._movements[packet.entityId] = [(entity.position.x, entity.position.z)]
+            except:
+                if packet.entityId in self._movements: self._movements[packet.entityId].append((entity.position[0], entity.position[2]))
+                else: self._movements[packet.entityId] = [(entity.position[0], entity.position[2])]
+
             self._battle_controller.entities[packet.entityId].position = packet.position
             self._battle_controller.entities[packet.entityId].yaw = packet.yaw
             self._battle_controller.entities[packet.entityId].pitch = packet.pitch
