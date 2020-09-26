@@ -44,6 +44,7 @@ class PlayerBase:
 class ControlledPlayerBase(PlayerBase, ABC):
     def __init__(self, version: str):
         self._battle_controller = self._get_controller(version)
+        self._movements = {}
 
         super(ControlledPlayerBase, self).__init__(version)
 
@@ -52,3 +53,6 @@ class ControlledPlayerBase(PlayerBase, ABC):
 
     def get_info(self):
         return self._battle_controller.get_info()
+
+    def get_movements(self):
+        return self._movements    
