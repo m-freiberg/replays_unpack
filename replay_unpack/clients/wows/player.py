@@ -19,6 +19,7 @@ from .network.packets import (
     NestedProperty,
     EntityEnter,
     EntityLeave,
+    PlayerPosition,
     PACKETS_MAPPING
 )
 
@@ -87,6 +88,15 @@ class ReplayPlayer(ControlledPlayerBase):
         elif isinstance(packet, EntityLeave):
             self._battle_controller.entities[packet.entityId].is_in_aoi = False
 
+        elif isinstance(packet, PlayerPosition):
+            # modified from https://github.com/Monstrofil/replays_unpack/pull/1/files#diff-ffa52a5cbf1afd02ee7ae0d63f281ccb
+            try:
+                if packet.entityId1 != (0,) and packet.entityId2 == (0,) and str(self._battle_controller.entities[packet.entityId1[0]])[0:7] == 'Vehicle':
+                    if packet.entityId1[0] in self._movements: self._movements[packet.entityId1[0]].append((packet.position.x, packet.position.z))
+                    else: self._movements[packet.entityId1[0]] = [(packet.position.x, packet.position.z)]         
+            except KeyError as e:
+                # entity not yet created
+                pass
         elif isinstance(packet, EntityCreate):
             entity = Entity(
                 id_=packet.entityID,
