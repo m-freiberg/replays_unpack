@@ -35,6 +35,9 @@ class ReplayPlayer(ControlledPlayerBase):
     def _get_movements(self):
         return get_movements()
 
+    def _get_health(self):
+        return get_health()
+
     def _get_controller(self, version):
         try:
             return get_controller('_'.join(version[:4]))
@@ -94,9 +97,15 @@ class ReplayPlayer(ControlledPlayerBase):
                 if packet.entityId1 != (0,) and packet.entityId2 == (0,) and str(self._battle_controller.entities[packet.entityId1[0]])[0:7] == 'Vehicle':
                     if packet.entityId1[0] in self._movements: self._movements[packet.entityId1[0]].append((packet.position.x, packet.position.z))
                     else: self._movements[packet.entityId1[0]] = [(packet.position.x, packet.position.z)]         
+            
+                    if packet.entityId1[0] in self._health: self._health[packet.entityId1[0]].append(self._battle_controller.entities[packet.entityId1[0]].properties['client']['health'])
+                    else: self._health[packet.entityId1[0]] = [self._battle_controller.entities[packet.entityId1[0]].properties['client']['health']]
+            
+            
             except KeyError as e:
                 # entity not yet created
                 pass
+        
         elif isinstance(packet, EntityCreate):
             entity = Entity(
                 id_=packet.entityID,
@@ -119,6 +128,11 @@ class ReplayPlayer(ControlledPlayerBase):
             except:
                 if packet.entityId in self._movements: self._movements[packet.entityId].append((entity.position[0], entity.position[2]))
                 else: self._movements[packet.entityId] = [(entity.position[0], entity.position[2])]
+
+            if packet.entityId in self._health: self._health[packet.entityId].append(entity.properties['client']['health'])
+            else: self._health[packet.entityId] = [entity.properties['client']['health']]
+            
+
 
             self._battle_controller.entities[packet.entityId].position = packet.position
             self._battle_controller.entities[packet.entityId].yaw = packet.yaw
