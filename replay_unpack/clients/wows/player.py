@@ -47,7 +47,7 @@ class ReplayPlayer(ControlledPlayerBase):
     def _get_packets_mapping(self):
         return PACKETS_MAPPING
 
-    def _process_packet(self, packet):
+    def _process_packet(self, time, packet):
 
         if isinstance(packet, Map):
             logging.debug('Welcome to map %s: %s', packet.name, packet.arenaId)
@@ -91,21 +91,6 @@ class ReplayPlayer(ControlledPlayerBase):
         elif isinstance(packet, EntityLeave):
             self._battle_controller.entities[packet.entityId].is_in_aoi = False
 
-        elif isinstance(packet, PlayerPosition):
-            # modified from https://github.com/Monstrofil/replays_unpack/pull/1/files#diff-ffa52a5cbf1afd02ee7ae0d63f281ccb
-            try:
-                if packet.entityId1 != (0,) and packet.entityId2 == (0,) and str(self._battle_controller.entities[packet.entityId1[0]])[0:7] == 'Vehicle':
-                    if packet.entityId1[0] in self._movements: self._movements[packet.entityId1[0]].append((packet.position.x, packet.position.z))
-                    else: self._movements[packet.entityId1[0]] = [(packet.position.x, packet.position.z)]         
-            
-                    if packet.entityId1[0] in self._health: self._health[packet.entityId1[0]].append(self._battle_controller.entities[packet.entityId1[0]].properties['client']['health'])
-                    else: self._health[packet.entityId1[0]] = [self._battle_controller.entities[packet.entityId1[0]].properties['client']['health']]
-            
-            
-            except KeyError as e:
-                # entity not yet created
-                pass
-        
         elif isinstance(packet, EntityCreate):
             entity = Entity(
                 id_=packet.entityID,
@@ -120,14 +105,29 @@ class ReplayPlayer(ControlledPlayerBase):
             assert values.read() == b''
             self._battle_controller.create_entity(entity)
 
+        elif isinstance(packet, PlayerPosition):
+            # modified from https://github.com/Monstrofil/replays_unpack/pull/1/files#diff-ffa52a5cbf1afd02ee7ae0d63f281ccb
+            try:
+                if packet.entityId1 != (0,) and packet.entityId2 == (0,) and str(self._battle_controller.entities[packet.entityId1[0]])[0:7] == 'Vehicle':
+                    if packet.entityId1[0] in self._movements: self._movements[packet.entityId1[0]].append((packet.position.x, packet.position.z, time))
+                    else: self._movements[packet.entityId1[0]] = [(packet.position.x, packet.position.z, time)]         
+            
+                    if packet.entityId1[0] in self._health: self._health[packet.entityId1[0]].append(self._battle_controller.entities[packet.entityId1[0]].properties['client']['health'])
+                    else: self._health[packet.entityId1[0]] = [self._battle_controller.entities[packet.entityId1[0]].properties['client']['health']]
+            
+            
+            except KeyError as e:
+                # entity not yet created
+                pass
+                
         elif isinstance(packet, Position):
             entity = self._battle_controller.entities[packet.entityId]
             try:
-                if packet.entityId in self._movements: self._movements[packet.entityId].append((entity.position.x, entity.position.z))
-                else: self._movements[packet.entityId] = [(entity.position.x, entity.position.z)]
+                if packet.entityId in self._movements: self._movements[packet.entityId].append((entity.position.x, entity.position.z, time))
+                else: self._movements[packet.entityId] = [(entity.position.x, entity.position.z, time)]
             except:
-                if packet.entityId in self._movements: self._movements[packet.entityId].append((entity.position[0], entity.position[2]))
-                else: self._movements[packet.entityId] = [(entity.position[0], entity.position[2])]
+                if packet.entityId in self._movements: self._movements[packet.entityId].append((entity.position[0], entity.position[2], time))
+                else: self._movements[packet.entityId] = [(entity.position[0], entity.position[2], time)]
 
             if packet.entityId in self._health: self._health[packet.entityId].append(entity.properties['client']['health'])
             else: self._health[packet.entityId] = [entity.properties['client']['health']]
