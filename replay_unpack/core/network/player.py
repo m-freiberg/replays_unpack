@@ -46,6 +46,9 @@ class ControlledPlayerBase(PlayerBase, ABC):
         self._battle_controller = self._get_controller(version)
         self._movements = {}
         self._health = {}
+        self._yaw = {}
+        self._pitch = {}
+        self._roll = {}
 
         super(ControlledPlayerBase, self).__init__(version)
 
@@ -60,3 +63,12 @@ class ControlledPlayerBase(PlayerBase, ABC):
     
     def get_health(self):
         return self._health
+
+    def get_yaw(self):
+        return self._yaw
+
+    def get_pitch(self):
+        return self._pitch
+
+    def get_roll(self):
+        return self._roll
