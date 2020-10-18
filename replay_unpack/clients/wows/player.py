@@ -38,6 +38,15 @@ class ReplayPlayer(ControlledPlayerBase):
     def _get_health(self):
         return get_health()
 
+    def _get_yaw(self):
+        return get_yaw()
+
+    def _get_pitch(self):
+        return get_pitch()
+
+    def _get_roll(self):
+          return get_roll()
+
     def _get_controller(self, version):
         try:
             return get_controller('_'.join(version[:4]))
@@ -48,7 +57,6 @@ class ReplayPlayer(ControlledPlayerBase):
         return PACKETS_MAPPING
 
     def _process_packet(self, time, packet):
-
         if isinstance(packet, Map):
             logging.debug('Welcome to map %s: %s', packet.name, packet.arenaId)
             self._battle_controller.map = packet.name
@@ -114,8 +122,17 @@ class ReplayPlayer(ControlledPlayerBase):
             
                     if packet.entityId1[0] in self._health: self._health[packet.entityId1[0]].append(self._battle_controller.entities[packet.entityId1[0]].properties['client']['health'])
                     else: self._health[packet.entityId1[0]] = [self._battle_controller.entities[packet.entityId1[0]].properties['client']['health']]
-            
-            
+
+                    # print(packet.rotation)
+                    if packet.entityId1[0] in self._yaw: self._yaw[packet.entityId1[0]].append(packet.rotation.x)
+                    else: self._yaw[packet.entityId1[0]] = [packet.rotation.x]
+                        
+                    if packet.entityId1[0] in self._roll: self._roll[packet.entityId1[0]].append(packet.rotation.z)
+                    else: self._roll[packet.entityId1[0]] = [packet.rotation.z]
+
+                    if packet.entityId1[0] in self._pitch: self._pitch[packet.entityId1[0]].append(packet.rotation.y)
+                    else: self._pitch[packet.entityId1[0]] = [packet.rotation.y]            
+
             except KeyError as e:
                 # entity not yet created
                 pass
@@ -123,15 +140,25 @@ class ReplayPlayer(ControlledPlayerBase):
         elif isinstance(packet, Position):
             entity = self._battle_controller.entities[packet.entityId]
             try:
-                if packet.entityId in self._movements: self._movements[packet.entityId].append((entity.position.x, entity.position.z, time))
-                else: self._movements[packet.entityId] = [(entity.position.x, entity.position.z, time)]
+                if packet.entityId in self._movements: self._movements[packet.entityId].append((packet.position.x, packet.position.z, time))
+                else: self._movements[packet.entityId] = [(packet.position.x, packet.position.z, time)]
             except:
-                if packet.entityId in self._movements: self._movements[packet.entityId].append((entity.position[0], entity.position[2], time))
-                else: self._movements[packet.entityId] = [(entity.position[0], entity.position[2], time)]
+                if packet.entityId in self._movements: self._movements[packet.entityId].append((packet.position[0], packet.position[2], time))
+                else: self._movements[packet.entityId] = [(packet.position[0], packet.position[2], time)]
 
             if packet.entityId in self._health: self._health[packet.entityId].append(entity.properties['client']['health'])
             else: self._health[packet.entityId] = [entity.properties['client']['health']]
             
+            if packet.entityId in self._yaw: self._yaw[packet.entityId].append(packet.yaw)
+            else: self._yaw[packet.entityId] = [packet.yaw]
+
+            if packet.entityId in self._roll: self._roll[packet.entityId].append(packet.roll)
+            else: self._roll[packet.entityId] = [packet.roll]
+            
+            if packet.entityId in self._pitch: self._pitch[packet.entityId].append(packet.pitch)
+            else: self._pitch[packet.entityId] = [packet.pitch]
+            
+
 
 
             self._battle_controller.entities[packet.entityId].position = packet.position
