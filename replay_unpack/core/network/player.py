@@ -49,7 +49,8 @@ class ControlledPlayerBase(PlayerBase, ABC):
         self._yaw = {}
         self._pitch = {}
         self._roll = {}
-
+        self._gunShots = {}
+        self._atbaGunShots = {}
         super(ControlledPlayerBase, self).__init__(version)
 
     def _get_controller(self, version):
@@ -72,3 +73,9 @@ class ControlledPlayerBase(PlayerBase, ABC):
 
     def get_roll(self):
         return self._roll
+
+    def get_gunShots(self):
+        return self._gunShots
+
+    def get_atbaGunShots(self):
+        return self._atbaGunShots
