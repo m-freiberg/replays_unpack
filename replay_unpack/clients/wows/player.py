@@ -47,6 +47,12 @@ class ReplayPlayer(ControlledPlayerBase):
     def _get_roll(self):
           return get_roll()
 
+    def _get_gunShots(self):
+          return get_gunShots(self)
+    
+    def _get_atbaGunShots(self):
+          return get_atbaGunShots(self)
+
     def _get_controller(self, version):
         try:
             return get_controller('_'.join(version[:4]))
@@ -169,6 +175,15 @@ class ReplayPlayer(ControlledPlayerBase):
         elif isinstance(packet, EntityMethod):
             entity = self._battle_controller.entities[packet.entityId]
             entity.call_client_method(packet.messageId, packet.data.io())
+
+            if packet.messageId == 13:  #shootATBAGuns
+              if packet.entityId in self._atbaGunShots: self._atbaGunShots[packet.entityId].append(time)
+              else: self._atbaGunShots[packet.entityId] = [time]
+            elif packet.messageId == 11:  # shootGuns
+              if packet.entityId in self._gunShots: self._gunShots[packet.entityId].append(time)
+              else: self._gunShots[packet.entityId] = [time]
+              
+            # print('{}: {}'.format(packet.messageId, entity._methods[packet.messageId]))
 
         elif isinstance(packet, EntityProperty):
             entity = self._battle_controller.entities[packet.objectID]
