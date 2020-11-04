@@ -28,7 +28,9 @@ class ReplayPlayer(ControlledPlayerBase):
 
     def _get_definitions(self, version):
         try:
-            return get_definitions('_'.join(version[:4]))
+            iter_version = '_'.join(version[:4])
+            iter_version = iter_version[:5] + iter_version[-1]
+            return get_definitions(iter_version)
         except RuntimeError:
             return get_definitions('_'.join(version[:3]))
 
