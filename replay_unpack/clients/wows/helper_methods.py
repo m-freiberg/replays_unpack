@@ -43,11 +43,11 @@ class Helper:
             no_data_keys = list(set(last_known_data.keys()) - set(data_by_time[time].keys()))
             # if a last known position is available, fill it in
             for key in no_data_keys:
-            if last_known_data[key] != None:data_by_time[time][key] = last_known_data[key]
+                if last_known_data[key] != None:data_by_time[time][key] = last_known_data[key]
 
             # update last known positions
             for val in data_by_time[time]:
-            last_known_data[val] = data_by_time[time][val]
+                last_known_data[val] = data_by_time[time][val]
 
       return data_by_time
 
