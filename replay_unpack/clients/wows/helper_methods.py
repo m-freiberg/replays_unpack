@@ -20,7 +20,9 @@ class Helper:
   #restructure position and health data to be a dict mapping each 
   # time stamp to a dict mapping shipId to position and health data 
   # for that time
-  def get_data_by_time(self):
+  # fill_in: if True, fill in unknown timestamp positions with the 
+  # last known position of that ship
+  def get_data_by_time(self, fill_in=False):
       player = self.player
       movements = player.get_movements()
       healths = player.get_health()
@@ -35,13 +37,17 @@ class Helper:
           if pos[2] not in data_by_time: data_by_time[pos[2]] = {}
           data_by_time[pos[2]][entityId] = [pos[0], pos[1], healths[entityId][ind]]
 
-      for time in data_by_time:
-        no_data_keys = list(set(last_known_data.keys()) - set(data_by_time[time].keys()))
-        for key in no_data_keys:
-          if last_known_data[key] != None:data_by_time[time][key] = last_known_data[key]
+      if fill_in:  
+        for time in data_by_time:
+            # get ships that don't have positions for time
+            no_data_keys = list(set(last_known_data.keys()) - set(data_by_time[time].keys()))
+            # if a last known position is available, fill it in
+            for key in no_data_keys:
+            if last_known_data[key] != None:data_by_time[time][key] = last_known_data[key]
 
-        for val in data_by_time[time]:
-          last_known_data[val] = data_by_time[time][val]
+            # update last known positions
+            for val in data_by_time[time]:
+            last_known_data[val] = data_by_time[time][val]
 
       return data_by_time
 
