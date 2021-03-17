@@ -1,4 +1,7 @@
-[![Build Status](https://travis-ci.org/Monstrofil/replays_unpack.svg?branch=master)](https://travis-ci.org/Monstrofil/replays_unpack)
+
+# World of Warships Replay Parser (forked from Monstrofil/replays_unpack)
+
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 # Replay Parser (WoT & WoWS)
 
